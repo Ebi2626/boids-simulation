@@ -16,9 +16,9 @@ export default class BoidsController {
      * @param {Number} subDivisionCount subdivision count defines the grid size. 
      * If it is given 10, world will be splitted into 10*10*10 cubes for spatial partitioning.
      */
-    constructor(boundaryX = 500, boundaryY = 500, boundaryZ = 500, subDivisionCount=1) {
+    constructor(boundaryX = 500, boundaryY = 500, boundaryZ = 500, subDivisionCount = 1) {
         const maxSize = Math.max(boundaryX, boundaryY, boundaryZ);
-        this.grid = new Grid(maxSize, maxSize/subDivisionCount);
+        this.grid = new Grid(maxSize, maxSize / subDivisionCount);
         this.subDivisionCount = subDivisionCount;
 
         this.flockEntities = [];
@@ -38,6 +38,38 @@ export default class BoidsController {
         this.cohesionRadius = 100;
         this.separationRadius = 100;
         this.obstacleRadius = 100;
+    }
+
+    /**
+     * Set alignment weight
+     * @param {number} alignment 0 - 5 
+     */
+    setAligmentWeight(alignment) {
+        this.aligmentWeight = alignment;
+    }
+
+    /**
+    * Set cohesion weight
+    * @param {number} cohesion 0 - 5 
+    */
+    setCohesionWeight(cohesion) {
+        this.cohesionWeight = cohesion;
+    }
+
+    /**
+    * Set separation weight
+    * @param {number} separation 0 - 5 
+    */
+    setSeparationWeight(separation) {
+        this.separationWeight = separation;
+    }
+
+    /**
+    * Set max speed
+    * @param {number} maxSpeed 0 - 10 
+    */
+    setMaxSpeed(maxSpeed) {
+        this.maxSpeed = maxSpeed;
     }
 
     /**
@@ -132,8 +164,8 @@ export default class BoidsController {
      * @param {Number} start start index for calculation
      * @param {Number} end end index for calculation
      */
-    iterate(start=0, end=this.flockEntities.length) {
-        for(let i=start; i<end; i++) {
+    iterate(start = 0, end = this.flockEntities.length) {
+        for (let i = start; i < end; i++) {
             const entity = this.flockEntities[i];
             const aligmentVel = this.computeAlignment(entity);
             const cohVel = this.computeCohesion(entity);
@@ -141,12 +173,12 @@ export default class BoidsController {
             const obsVel = this.computeObstacles(entity);
 
             // add components
-            const vx = this.aligmentWeight*aligmentVel[0] + this.cohesionWeight*cohVel[0] +
-                        50*this.separationWeight*sepVel[0] + 100*obsVel[0];
-            const vy = this.aligmentWeight*aligmentVel[1] + this.cohesionWeight*cohVel[1] +
-                        50*this.separationWeight*sepVel[1] + 100*obsVel[1];
-            const vz = this.aligmentWeight*aligmentVel[2] + this.cohesionWeight*cohVel[2] +
-                        50*this.separationWeight*sepVel[2] + 100*obsVel[2];
+            const vx = this.aligmentWeight * aligmentVel[0] + this.cohesionWeight * cohVel[0] +
+                50 * this.separationWeight * sepVel[0] + 100 * obsVel[0];
+            const vy = this.aligmentWeight * aligmentVel[1] + this.cohesionWeight * cohVel[1] +
+                50 * this.separationWeight * sepVel[1] + 100 * obsVel[1];
+            const vz = this.aligmentWeight * aligmentVel[2] + this.cohesionWeight * cohVel[2] +
+                50 * this.separationWeight * sepVel[2] + 100 * obsVel[2];
 
             entity.addVelocity(vx, vy, vz);
             entity.move(this.maxEntitySpeed, this.boundaryX, this.boundaryY, this.boundaryZ);
@@ -165,9 +197,9 @@ export default class BoidsController {
         let neighborCount = 0;
 
         this.grid.getEntitiesInCube(entity.x, entity.y, entity.z, this.aligmentRadius, (currentEntity) => {
-            if(currentEntity != entity &&
-               currentEntity.getType() == Entity.FLOCK_ENTITY &&
-               entity.getDistance(currentEntity) < this.aligmentRadius) {
+            if (currentEntity != entity &&
+                currentEntity.getType() == Entity.FLOCK_ENTITY &&
+                entity.getDistance(currentEntity) < this.aligmentRadius) {
                 neighborCount++;
                 aligmentX += currentEntity.vx;
                 aligmentY += currentEntity.vy;
@@ -175,13 +207,12 @@ export default class BoidsController {
             }
         });
 
-        if(neighborCount > 0)
-        {
+        if (neighborCount > 0) {
             aligmentX /= neighborCount;
             aligmentY /= neighborCount;
             aligmentZ /= neighborCount;
-            const aligmentMag = Math.sqrt((aligmentX*aligmentX)+(aligmentY*aligmentY)+(aligmentZ*aligmentZ));
-            if(aligmentMag > 0) {
+            const aligmentMag = Math.sqrt((aligmentX * aligmentX) + (aligmentY * aligmentY) + (aligmentZ * aligmentZ));
+            if (aligmentMag > 0) {
                 aligmentX /= aligmentMag;
                 aligmentY /= aligmentMag;
                 aligmentZ /= aligmentMag;
@@ -203,9 +234,9 @@ export default class BoidsController {
         let neighborCount = 0;
 
         this.grid.getEntitiesInCube(entity.x, entity.y, entity.z, this.cohesionRadius, (currentEntity) => {
-            if(currentEntity != entity &&
-               currentEntity.getType() == Entity.FLOCK_ENTITY &&
-               entity.getDistance(currentEntity) < this.cohesionRadius) {
+            if (currentEntity != entity &&
+                currentEntity.getType() == Entity.FLOCK_ENTITY &&
+                entity.getDistance(currentEntity) < this.cohesionRadius) {
                 neighborCount++;
                 cohX += currentEntity.x;
                 cohY += currentEntity.y;
@@ -213,8 +244,7 @@ export default class BoidsController {
             }
         });
 
-        if(neighborCount > 0)
-        {
+        if (neighborCount > 0) {
             cohX /= neighborCount;
             cohY /= neighborCount;
             cohZ /= neighborCount;
@@ -223,8 +253,8 @@ export default class BoidsController {
             cohY = cohY - entity.y;
             cohZ = cohZ - entity.z;
 
-            var cohMag = Math.sqrt((cohX*cohX)+(cohY*cohY)+(cohZ*cohZ));
-            if(cohMag > 0) {
+            var cohMag = Math.sqrt((cohX * cohX) + (cohY * cohY) + (cohZ * cohZ));
+            if (cohMag > 0) {
                 cohX /= cohMag;
                 cohY /= cohMag;
                 cohZ /= cohMag;
@@ -247,20 +277,20 @@ export default class BoidsController {
 
         this.grid.getEntitiesInCube(entity.x, entity.y, entity.z, this.separationRadius, (currentEntity) => {
             let distance = entity.getDistance(currentEntity);
-            if(distance <= 0) {
+            if (distance <= 0) {
                 distance = 0.01
             }
-            
-            if(currentEntity != entity &&
-               currentEntity.getType() == Entity.FLOCK_ENTITY &&
-               distance < this.separationRadius) {
+
+            if (currentEntity != entity &&
+                currentEntity.getType() == Entity.FLOCK_ENTITY &&
+                distance < this.separationRadius) {
                 neighborCount++;
                 const sx = entity.x - currentEntity.x;
                 const sy = entity.y - currentEntity.y;
                 const sz = entity.z - currentEntity.z;
-                sepX += (sx/distance)/distance;
-                sepY += (sy/distance)/distance;
-                sepZ += (sz/distance)/distance;
+                sepX += (sx / distance) / distance;
+                sepY += (sy / distance) / distance;
+                sepZ += (sz / distance) / distance;
             }
         });
 
@@ -279,37 +309,37 @@ export default class BoidsController {
 
         this.grid.getEntitiesInCube(entity.x, entity.y, entity.z, this.obstacleRadius, (currentObstacle) => {
             const distance = entity.getDistance(currentObstacle);
-            if(distance > 0 &&
-               currentObstacle.getType() == Entity.OBSTACLE_ENTITY &&
-               distance < this.obstacleRadius) {
+            if (distance > 0 &&
+                currentObstacle.getType() == Entity.OBSTACLE_ENTITY &&
+                distance < this.obstacleRadius) {
                 const ox = entity.x - currentObstacle.x;
                 const oy = entity.y - currentObstacle.y;
                 const oz = entity.z - currentObstacle.z;
-                avoidX += (ox/distance)/distance;
-                avoidY += (oy/distance)/distance;
-                avoidZ += (oz/distance)/distance;
+                avoidX += (ox / distance) / distance;
+                avoidY += (oy / distance) / distance;
+                avoidZ += (oz / distance) / distance;
             }
         });
 
         // avoid boundary limits
-        const boundaryObstacleRadius = this.obstacleRadius/4;
+        const boundaryObstacleRadius = this.obstacleRadius / 4;
         const distX = this.boundaryX - entity.x;
         const distY = this.boundaryY - entity.y;
         const distZ = this.boundaryZ - entity.z;
-        if(entity.x < boundaryObstacleRadius && Math.abs(entity.x) > 0) {
-            avoidX += 1/entity.x;
-        } else if(distX < boundaryObstacleRadius && distX > 0) {
-            avoidX -= 1/distX;
+        if (entity.x < boundaryObstacleRadius && Math.abs(entity.x) > 0) {
+            avoidX += 1 / entity.x;
+        } else if (distX < boundaryObstacleRadius && distX > 0) {
+            avoidX -= 1 / distX;
         }
-        if(entity.y < boundaryObstacleRadius && Math.abs(entity.y) > 0) {
-            avoidY += 1/entity.y;
-        } else if(distY < boundaryObstacleRadius && distY > 0) {
-            avoidY -= 1/distY;
+        if (entity.y < boundaryObstacleRadius && Math.abs(entity.y) > 0) {
+            avoidY += 1 / entity.y;
+        } else if (distY < boundaryObstacleRadius && distY > 0) {
+            avoidY -= 1 / distY;
         }
-        if(entity.z < boundaryObstacleRadius && Math.abs(entity.z) > 0) {
-            avoidZ += 1/entity.z;
-        } else if(distZ < boundaryObstacleRadius && distZ > 0) {
-            avoidZ -= 1/distZ;
+        if (entity.z < boundaryObstacleRadius && Math.abs(entity.z) > 0) {
+            avoidZ += 1 / entity.z;
+        } else if (distZ < boundaryObstacleRadius && distZ > 0) {
+            avoidZ -= 1 / distZ;
         }
 
         return [avoidX, avoidY, avoidZ];
@@ -355,12 +385,12 @@ export default class BoidsController {
      * @param {Number} end 
      * @returns {Object} serialized partial boids data
      */
-    serializeBoidsData(start=0, end=this.flockEntities.length) {
+    serializeBoidsData(start = 0, end = this.flockEntities.length) {
         const flockEntities = [];
-        for(let i=start; i<end; i++) {
+        for (let i = start; i < end; i++) {
             flockEntities.push(this.flockEntities[i].serialize());
         }
-        return {start, flockEntities};
+        return { start, flockEntities };
     }
 
     /**
@@ -370,10 +400,10 @@ export default class BoidsController {
     applyBoidsData(data) {
         const start = data.start;
         const flockEntities = data.flockEntities;
-        for(let i=0; i<flockEntities.length; i++) {
-            const entity = this.flockEntities[start+i];
+        for (let i = 0; i < flockEntities.length; i++) {
+            const entity = this.flockEntities[start + i];
             const updatedData = flockEntities[i];
-            if(entity.id == updatedData.id) {
+            if (entity.id == updatedData.id) {
                 entity.updateData(updatedData);
             } else {
                 console.log("ids do not match!");

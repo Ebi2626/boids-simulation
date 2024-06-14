@@ -9,4 +9,4 @@ Implementacja algorytmu stada opracowanego przez Craiga Raynoldsa. Może być wy
 
 **Grid** dzieli przestrzeń wykorzystywaną w symulacji na trójwymiarowe sześciany, co pozwala na szybsze obliczanie okolic określonej jednostki. Wykorzystuje technikę określaną jako "spatial-partition".
 
-Jest to wariacja oryginalnego algorytmu utworzonego przez [Ercana Gercka](https://github.com/ercang/boids-js), która rozbudowuje jego podstawowy wariant o detekcję kolizji i wzbogaca o tekstury dla przyjemniejszego odbioru. 
+Jest to wariacja oryginalnego algorytmu utworzonego przez [Ercana Gercka](https://github.com/ercang/boids-js).

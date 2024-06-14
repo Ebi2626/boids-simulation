@@ -17,30 +17,31 @@ export default class SimpleRenderer {
     }
 
     init() {
+        const cubeTextureLoader = new THREE.CubeTextureLoader().setPath('../img/');
+        const textureLoader = new THREE.TextureLoader().setPath('../img/');
         this.camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.01, 100000 );
         this.camera.position.z = 0;
      
         this.scene = new THREE.Scene();
-        this.scene.background = new THREE.Color( 0xffffff );
+        this.sceneTexture = cubeTextureLoader.load([
+          'posx.jpg',
+          'negx.jpg',
+          'posy.jpg',
+          'negy.jpg',
+          'posz.jpg',
+          'negz.jpg',
+        ]);
+        
+        const obstacleTexture = textureLoader.load('golfball.jpg');
+
+        this.scene.background = this.sceneTexture;
      
         this.entityGeometry = new THREE.BoxGeometry( 5, 5, 15 );
         this.obstacleGeometry = new THREE.SphereGeometry( 50, 15, 15 );
-        this.entityMaterial = new THREE.MeshNormalMaterial();
-        this.obstacleMaterial = new THREE.MeshNormalMaterial();
+        this.entityMaterial = new THREE.MeshLambertMaterial({ color: 0xffff00, emissive: 0xaaaa00 });
+        this.obstacleMaterial = new THREE.MeshBasicMaterial({map: obstacleTexture});
 
         this.createGridVisual(this.boidsController.subDivisionCount);
-
-        // create boundary
-        const b = this.boidsController.getBoundary();
-        const geometry = new THREE.BoxGeometry(b[0], b[1], b[2]);
-        const wireframe = new THREE.EdgesGeometry(geometry);
-        const line = new THREE.LineSegments(wireframe);
-        line.material.color = new THREE.Color( 0x000000 );
-        line.material.transparent = false;
-        line.position.x = b[0]/2;
-        line.position.y = b[1]/2;
-        line.position.z = b[2]/2;
-        this.scene.add(line);
      
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
